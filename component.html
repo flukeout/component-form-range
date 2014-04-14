@@ -1,89 +1,77 @@
-<polymer-element name="ceci-text-input" attributes="inputname placeholdertext emitonchange label" extends="ceci-element" placeholdertext="Placeholder" inputname="Text Input">
+<polymer-element name="ceci-form-range" attributes="inputname min max start" min="0" start="50" max="100" extends="ceci-element" inputname="Slider">
   <template>
     <link rel="stylesheet" href="component.css">
-    <input id="inputText" type="text" on-input="{{input}}" on-keypress="{{keypress}}" /><button id="button" on-click="{{submit}}"></button>
+    <label>{{inputname}}</label>
+    <span id="currentValue"></span>
+    <input id="slider" on-change="{{sliderChange}}" min="{{min}}" max="{{max}}" type="range"  />
+    <span class="current-value"></span>
+
     <shadow></shadow>
     <script type="text/json" id="ceci-definition">
       {
+        "name": "Form Range",
         "tags": ["input", "form"],
         "thumbnail": "./thumbnail.png",
-        "name": "Text Input",
         "description": "A text input that broadcasts whatever a user types.",
-        "broadcasts": {
-          "sendData": {
-            "label": "Send Data",
-            "description": "Occurs when button is clicked or Enter key is pressed.",
-            "default": true
-          }
-        },
-        "listeners": {
-          "click": {
-            "description": "Causes a fake click event to occur.",
-            "label": "Send Data"
-          }
-        },
+        "broadcasts": {},
+        "listeners": {},
         "attributes": {
           "inputname": {
-            "label": "Input Name",
+            "label": "Input Name & Label",
             "description": "The name of this field, helpful when saving data.",
             "editable": "text",
             "listener": true,
             "defaultListener": false
           },
-          "placeholdertext": {
-            "label": "Placeholder Text",
-            "description": "The text you want your input field to show by default.",
-            "editable": "text",
-            "listener": true
+          "min": {
+            "label": "Min",
+            "description": "Minimum Value",
+            "editable": "number",
+            "listener": true,
+            "defaultListener": false
           },
-          "emitonchange": {
-            "label": "Emit on change",
-            "description": "Background color of the button while it is being clicked or tapped.",
-            "editable": "boolean",
-            "listener": true
+          "max": {
+            "label": "Max",
+            "description": "Maximum Value",
+            "editable": "number",
+            "listener": true,
+            "defaultListener": false
+          },
+          "start": {
+            "label": "Start",
+            "description": "Starting Value",
+            "editable": "number",
+            "listener": true,
+            "defaultListener": false
           }
+
         }
       }
     </script>
   </template>
   <script>
-    Polymer('ceci-text-input', {
-      emitonchange:false,
+    Polymer('ceci-form-range', {
       ready: function () {
+        this.updateDisplay();
         this.super();
-
-        var that = this;
-        this.$.button.innerHTML = this.gettext("ceci-text-input/button") || this.$.button.innerHTML;
       },
-      submit: function () {
-        this.broadcast('sendData', this.$.inputText.value);
-        this.$.inputText.value = "";
+      updateDisplay: function(){
+        this.$.currentValue.innerHTML = this.value;
       },
-      input: function (e) {
-        if (!this.emitonchange) {
-          return;
-        }
-        this.broadcast('sendData', this.$.inputText.value);
+      setValue: function(v){
+        this.$.slider.value = parseInt(v);
+        this.updateDisplay();
       },
-      keypress: function (e) {
-        if (!this.emitonchange) {
-          if (e.keyCode == 13) {
-            this.broadcast('sendData', this.$.inputText.value);
-            this.$.inputText.value = '';
-          }
-        }
+      sliderChange : function(){
+        this.updateDisplay();
       },
-      emitonchangeChanged: function(oldValue, newValue) {
-        this.classList.toggle('onchange');
-        this.$.button.classList.toggle('hidden');
+      inputnameChanged : function(){
+        var event = new CustomEvent("inputnameChanged");
+        this.dispatchEvent(event);
       },
-      placeholdertextChanged: function(oldValue, newValue) {
-        if (this.$.inputText.hasAttribute('placeholder')) {
-          this.$.inputText.setAttribute("placeholder", newValue);
-        }
-        else {
-          this.$.inputText.setAttribute("placeholder", newValue);
-        }
+      get value() {
+        var val = this.shadowRoot.querySelector("input").value;
+        return val;
       }
     });
   </script>
